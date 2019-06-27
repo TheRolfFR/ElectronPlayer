@@ -18,7 +18,7 @@ global.services = [];
 
 function createWindow() {
 	// Create the browser window.
-	mainWindow = new BrowserWindow({
+	let parameters = {
 		minWidth: 800,
 		minHeight: 600,
 		webPreferences: {
@@ -38,15 +38,60 @@ function createWindow() {
 		backgroundColor: '#00796B',
 		toolbar: false,
 		show: false
-	});
+	};
 
 	// set size
-	//if(store.get('settings.rememberWindowPosition'))
-		//mainWindow.setBounds({x : store.get('settings.windowPosition')[0], y: store.get('settings.windowPosition')[1], width: store.get('settings.windowSize')[0], height: store.get('settings.windowSize')[1]});
+	if(store.get('settings.rememberWindowPosition')) {
+		if(store.get('settings.windowPosition') !== undefined) {
+			parameters.x = store.get('settings.windowPosition')[0];
+			parameters.y = store.get('settings.windowPosition')[1];
+		}
+		if(store.get('settings.windowSize') !== undefined) {
+			parameters.width = store.get('settings.windowSize')[0];
+			parameters.height = store.get('settings.windowSize')[1];
+		}
+	}
+
+	mainWindow = new BrowserWindow(parameters);
 
 	mainWindow.loadURL(`file://${__dirname}/player/player.html`);
 
 	ipcMain.once('vueReady', () => {
+
+		// size reseter
+		globalShortcut.register('Alt+R', () => {
+			if(mainWindow.isFocused())
+				mainWindow.setSize(800, 600, true);
+		});
+
+		// because local shortcut doesn't work in webviews
+		// trigger menu
+		if(process.platform == 'win32') {
+			globalShortcut.register('Alt+M', () => {
+				if(mainWindow.webContents.isFocused())
+					mainWindow.webContents.send('triggerMenu');
+			});
+		}
+
+		// settings trigerer
+		globalShortcut.register('Alt+S', () => {
+			if(mainWindow.isFocused()) {
+				mainWindow.webContents.send('triggerSettings');
+			}
+		})
+
+		// open maybe the dev tools
+		if(store.get('openDevTools'))
+			mainWindow.webContents.openDevTools();
+
+		// devtools events
+		mainWindow.webContents.on('devtools-opened', () => {
+			store.set('openDevTools', true);
+		})
+		mainWindow.webContents.on('devtools-closed', () => {
+			store.set('openDevTools', false);
+		})
+
 		setTimeout(() => {
 			mainWindow.show();
 		}, 500);
@@ -64,33 +109,28 @@ function createWindow() {
 		mainWindow.minimize();
 	});
 
-	// trigger menu
-	if(process.platform == 'win32') {
-		globalShortcut.register('Alt+M', () => {
-			if(mainWindow.webContents.isFocused())
-			mainWindow.webContents.send('triggerMenu');
-		});
-	}
-
 	// open dev tools
 	globalShortcut.register('CommandOrControl+Shift+I', () => {
-		if(mainWindow.webContents.isFocused()) {
-			if(mainWindow.webContents.isDevToolsOpened())
-				mainWindow.webContents.closeDevTools();
-			else
+		// because trigger doesn't work
+
+		// closes the window if opened anywhere
+		if(mainWindow.webContents.isDevToolsOpened()) {
+			mainWindow.webContents.closeDevTools();
+		} else {
+			// opens it if the window is focused
+			if(mainWindow.webContents.isFocused()) {
 				mainWindow.webContents.openDevTools();
+			}
 		}
 	});
 
 	mainWindow.on('move', () => {
-		if(store.get('settings.rememberWindowPosition'))
-			store.set('settings.windowPosition', mainWindow.getPosition());
+		// corrects [-8, -8] when maximised
+		store.set('settings.windowPosition', ((mainWindow.isMaximized()) ? ([0, 0]) : mainWindow.getPosition()));
 	})
 
 	mainWindow.on('resize', () => {
-		console.info('resize');
-		if(store.get('settings.rememberWindowPosition'))
-			store.set('settings.windowSize', mainWindow.getSize());
+		store.set('settings.windowSize', mainWindow.getSize());
 	})
 }
 

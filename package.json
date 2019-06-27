@@ -4,20 +4,21 @@
   "description": "An Electron Based Web Video Services Player. Supporting Netflix, Youtube, Twitch, Floatplane And More",
   "main": "src/main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "node_modules\\electron\\dist\\electron.exe .",
     "test": "echo 'TODO: Tests'",
-    "build": "electron-builder -p never"
+    "build": "electron-builder -p never",
+    "win": "electron-builder -p never --win"
   },
   "repository": "https://github.com/oscartbeaumont/ElectronPlayer.git",
   "author": "Oscar Beaumont <oscar@otbeaumont.me> (https://otbeaumont.me)",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^3.1.7",
+    "electron": "git+https://github.com/castlabs/electron-releases.git#v5.0.6-wvvmp",
     "electron-builder": "^20.39.0"
   },
   "dependencies": {
-    "electron-store": "^3.2.0",
-    "electron-widevinecdm": "^7.0.0"
+    "electron-localshortcut": "^3.1.0",
+    "electron-store": "^3.2.0"
   },
   "build": {
     "appId": "me.otbeaumont.ElectronPlayer",
@@ -25,10 +26,13 @@
       "category": "public.app-category.entertainment"
     },
     "win": {
-      "target": "msi"
+      "target": "portable"
     },
     "snap": {
-     "plugs": ["default", "screen-inhibit-control"]
+      "plugs": [
+        "default",
+        "screen-inhibit-control"
+      ]
     },
     "linux": {
       "category": "Video",

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ElectronPlayer Redesign</title>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.5.14/vuetify.min.css'>
+    <link rel='stylesheet'
+        href='https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/3.0.1/iconfont/material-icons.min.css'>
+    <link rel="stylesheet" href="player.css">
+</head>
+
+<body>
+    <div id="content">
+        <v-app dark style="background: transparent">
+            <v-system-bar ref="systembar" app absolute="true" window height="32" color="transparent">
+                <v-img v-on:click="triggerShowMenu()"
+                    src="../../build/icon.png"
+                    max-height="22" max-width="22"></v-img>
+                <span v-on:click="triggerShowMenu()" class="ml-2 font-weight-medium maintitle">{{ title }}</span>
+                <v-spacer></v-spacer>
+                <v-icon v-on:click="sendMessage('minimize')">remove</v-icon>
+                <v-icon v-on:click="sendMessage('maximize')">check_box_outline_blank</v-icon>
+                <v-icon v-on:click="close()">close</v-icon>
+            </v-system-bar>
+            <v-expand-transition>
+                <v-toolbar ref="menu" dense flat light v-show="showMenu" style="margin-top: 32px; background: transparent"
+                    class="pa-0" id="menu-toolbar">
+                    <template v-for="(menu, i) in menus" :key="i">
+                        <template v-if="menu.type == undefined">
+                            <v-menu light offset-y>
+                                <template v-slot:activator="{ on }">
+                                    <v-btn dark flat class="menu-btn ma-0 py-1 px-2 text-capitalize" v-on="on">
+                                        {{ menu.name }}</v-btn>
+                                </template>
+                                <v-list>
+                                    <v-list-tile v-for="(item, itemindex) in menu.items" :key="itemindex" @click="item.click(item.name)"
+                                        style="height: 24px" :inactive="item.disabled"
+                                        :class="{'item-disabled' : item.disabled}">
+                                        <template v-if="item.type === undefined">
+                                            <v-list-tile-title>{{ item.name }}</v-list-tile-title>
+                                            <v-list-tile-content></v-list-tile-content>
+                                            <v-list-tile-action class="pl-2 accelerator">
+                                                {{ acceleratorName(item.accelerator || "") }}
+                                            </v-list-tile-action>
+                                        </template>
+                                        <template v-else>
+                                            <v-divider></v-divider>
+                                        </template>
+                                    </v-list-tile>
+                                </v-list>
+                            </v-menu>
+                        </template>
+                        <template v-else>
+                            <v-btn dark flat class="menu-btn ma-0 py-1 px-2 text-capitalize"
+                                v-on:click="settings.showDialog = true">{{ menu.name }}</v-btn>
+                        </template>
+                    </template>
+                </v-toolbar>
+            </v-expand-transition>
+
+            <v-fade-transition>
+                <div>
+                    <template v-for="(viewName, index) in views" :key="index">
+                        <div class="view" :style="{ top: webviewTop, display: (index == activeView) ? 'block' : 'none' }">
+                            <webview :ref="viewName + 'view'" class="webview" :src="getItem(viewName).url" v-on:enter-html-full-screen="calculateWebviewTop()" v-on:leave-html-full-screen="calculateWebviewTop()"></webview>
+                        </div>
+                    </template>
+                </div>
+            </v-fade-transition>
+
+            <v-fade-transition>
+                <div id="animbg" v-if="animation !== undefined">
+                    <div id="anim" :style="{ top: animation.top + 'px', left: animation.left + 'px' }" :class="{ load: animation.loadAnimation }">
+                        <v-img :src="animation.item.logo" aspect-ratio="1" contain="true" :width="animation.width" :height="animation.height"></v-img>
+                    </div>
+                    <div id="circle" :style="{ background: animation.item.color }" :class="{ load: animation.loadCircle }"></div>
+                </div>
+            </v-fade-transition>
+
+            <v-layout align-center justify-center row wrap class="text-xs-center text-white">
+                <v-flex xs12>
+                    <v-layout justify-center row wrap>
+                        <v-flex xs2 v-for="item in items" :key="item.name" :href="item.logo">
+                            <a :href="item.url" class="item-name" v-on:click.stop.prevent="showView(item)">
+                                <v-img :ref="item.name" height="94" width="94" :src="item.logo" aspect-ratio="1" contain="true"
+                                    class="mx-auto"></v-img>
+                                <div class="mt-3">
+                                    <h3 class="font-weight-bold mb-0">{{ item.name }}</h3>
+                                </div>
+                            </a>
+                        </v-flex>
+                    </v-layout>
+                </v-flex>
+            </v-layout>
+            <v-dialog v-model="settings.showDialog" width="600px">
+                <v-card light>
+                    <v-card-title>
+                        <span class="headline">Settings</span>
+                    </v-card-title>
+                    <v-form ref="form" v-model="valid" lazy-validation>
+                        <v-subheader>Window settings</v-subheader>
+
+                        <v-list>
+                            <v-list-tile avatar>
+                                <v-list-tile-content>
+                                    <v-list-tile-title>Always on top</v-list-tile-title>
+                                    <v-list-tile-sub-title>Even when not focused, the window will be visible
+                                    </v-list-tile-sub-title>
+                                </v-list-tile-content>
+
+                                <v-list-tile-action>
+                                    <v-checkbox v-model="settings.alwaysOnTop"></v-checkbox>
+                                </v-list-tile-action>
+                            </v-list-tile>
+
+                            <v-list-tile>
+                                <v-list-tile-content>
+                                    <v-list-tile-title>Remember window details</v-list-tile-title>
+                                    <v-list-tile-sub-title>Will restore the window details as they were when you quitted
+                                    </v-list-tile-sub-title>
+                                </v-list-tile-content>
+
+                                <v-list-tile-action>
+                                    <v-checkbox v-model="settings.rememberWindowPosition"></v-checkbox>
+                                </v-list-tile-action>
+                            </v-list-tile>
+                            <v-list-tile>
+                                <v-btn small depressed block color="primary">Set window frameless*</v-btn>
+                            </v-list-tile>
+                        </v-list>
+
+                        <v-radio-group v-model="settings.defaultService">
+                            <v-list>
+                                <v-subheader>Default service</v-subheader>
+                                <v-list-tile v-for="service in settings.serviceValues" :key="service">
+                                    <v-list-tile-content>
+                                        <v-list-title>{{ service }}</v-list-title>
+                                    </v-list-tile-content>
+                                    <v-list-tile-action>
+                                        <v-radio :value="service"></v-radio>
+                                    </v-list-tile-action>
+                                </v-list-tile>
+                            </v-list>
+                        </v-radio-group>
+                    </v-form>
+
+                    <v-subheader>Other</v-subheader>
+                    <v-list>
+                        <v-list-tile>
+                            <v-btn small depressed block color="primary">Edit config</v-btn>
+                        </v-list-tile>
+                        <v-list-tile>
+                            <v-btn small depressed block color="primary">Reset all settings*</v-btn>
+                        </v-list-tile>
+                    </v-list>
+
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="green darken-1" flat="flat" @click="settings.showDialog = false">Cancel</v-btn>
+                        <v-btn color="green darken-1" flat="flat" @click="settings.showDialog = false">Save</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+            </v-layout>
+        </v-app>
+    </div>
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.5.14/vuetify.min.js'></script>
+    <script src="player.js"></script>
+</body>
+
+</html>

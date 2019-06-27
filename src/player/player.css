@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,700&display=swap');
+
+html, body {
+	height: 100%;
+	margin: 0;
+}
+html {
+	overflow: hidden !important;
+}
+div#content {
+background: #00796b;
+background: -moz-linear-gradient(top, #00796b 0%, #00796b 10%, #004d40 100%);
+background: -webkit-gradient(left top, left bottom, color-stop(0%, #00796b), color-stop(10%, #00796b), color-stop(100%, #004d40));
+background: -webkit-linear-gradient(top, #00796b 0%, #00796b 10%, #004d40 100%);
+background: -o-linear-gradient(top, #00796b 0%, #00796b 10%, #004d40 100%);
+background: -ms-linear-gradient(top, #00796b 0%, #00796b 10%, #004d40 100%);
+background: linear-gradient(to bottom, #00796b 0%, #00796b 10%, #004d40 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00796b', endColorstr='#004d40', GradientType=0 );
+	height: 100%;
+}
+#content #app, #content .application--wrap {
+	min-height: 100%;
+}
+#content .item-name {
+	color: white;
+	text-decoration: none;
+}
+#content .menu-btn {
+	min-width: 0;
+}
+#menu-toolbar .v-toolbar__content {
+	padding: 0;
+}
+#app {
+	font-family: 'Source Sans Pro', sans-serif !important;
+}
+#app .v-list__tile {
+	height: 100%;
+}
+#app .accelerator, #app .item-disabled {
+	opacity: .4;
+}
+#app .accelerator {
+	text-transform: uppercase;
+}
+
+#app .view {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 5;
+	transition: top 200ms;
+}
+#app .view .webview {
+	height: 100%;
+	width: 100%;
+}
+
+body .v-overlay {
+	height: 600px;
+	width: 800px;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+#app .v-system-bar {
+	-webkit-app-region: drag;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+#app .v-system-bar .v-icon, #app .v-system-bar .v-image, #app .v-system-bar .maintitle {
+	-webkit-app-region: no-drag;
+}
+#app .v-input__control {
+	width: 100%;
+}
+#app .v-list__tile__action, #app .v-list__tile__action .v-input--selection-controls .v-input__slot {
+	text-align: right;
+}
+
+#animbg {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: #343434;
+	z-index: 1;
+}
+#animbg #anim {
+	position: fixed;
+	transition: all .2s linear;
+}
+#animbg #anim, #animbg #anim .v-image {
+	z-index: 5;
+}
+#animbg #anim.load {
+	top: 50% !important;
+	left: 50% !important;
+	transform: translate(-50%, -50%);
+}
+#animbg #circle {
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	border-radius: 50%;
+	width: 450px;
+	height: 450px;
+	opacity: 0.4;
+	transform: translate(-50%, -50%) scale(0);
+	transition: all .35s linear;
+	z-index: 2;
+}
+#animbg #circle.load {
+	transform: translate(-50%, -50%) scale(1);
+	opacity: 0;
+}

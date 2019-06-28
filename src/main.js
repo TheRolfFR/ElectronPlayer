@@ -12,7 +12,6 @@ const headerScript = fs.readFileSync(
 
 // Create Global Varibles
 let mainWindow; // Global Windows Object
-const menu = require('./menu');
 const store = new Store();
 global.services = [];
 
@@ -80,6 +79,40 @@ function createWindow() {
 			}
 		})
 
+		// reload trigger
+		globalShortcut.register('CmdOrCtrl+R', () => {
+			mainWindow.webContents.send('reloadCurrentView');
+		})
+
+		// zoom trigger
+		// zoom reset
+		globalShortcut.register('CmdOrCtrl+num0', () => {
+			if(mainWindow.isFocused())
+				mainWindow.webContents.send('zoomReset');
+		})
+		globalShortcut.register('CmdOrCtrl+Shift+0', () => {
+			if(mainWindow.isFocused())
+				mainWindow.webContents.send('zoomReset');
+		});
+		// zoom in
+		globalShortcut.register('CmdOrCtrl+numadd', () => {
+			if(mainWindow.isFocused())
+				mainWindow.webContents.send('zoomIn');
+		})
+		globalShortcut.register('CmdOrCtrl+Shift+Plus', () => {
+			if(mainWindow.isFocused())
+				mainWindow.webContents.send('zoomIn');
+		})
+		// zoom out
+		globalShortcut.register('CmdOrCtrl+numsub', () => {
+			if(mainWindow.isFocused())
+				mainWindow.webContents.send('zoomOut');
+		})
+		globalShortcut.register('CmdOrCtrl+Shift+6', () => {
+			if(mainWindow.isFocused())
+				mainWindow.webContents.send('zoomOut');
+		})
+
 		// open maybe the dev tools
 		if(store.get('openDevTools'))
 			mainWindow.webContents.openDevTools();
@@ -107,6 +140,10 @@ function createWindow() {
 
 	ipcMain.on('minimize', () => {
 		mainWindow.minimize();
+	});
+
+	ipcMain.on('getVersion', (event, arg) => {
+		event.returnValue = app.getVersion();
 	});
 
 	// open dev tools

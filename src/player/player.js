@@ -1,4 +1,4 @@
-const { app, ipcRenderer, remote } = require('electron');
+const { app, ipcRenderer, remote, shell } = require('electron');
 const services = require('../default-services.js');
 const menu = require('./menu');
 Store = require('electron-store')
@@ -64,8 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			resetValidation: () => {
 				this.$refs.form.resetValidation()
 			},
-			sendMessage: (message) => {
-				ipcRenderer.send(message);
+			sendMessage: (message, option = null) => {
+				ipcRenderer.send(message, option);
 			},
 			close: () => {
 				remote.getCurrentWindow().close();
@@ -118,10 +118,15 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 			},
 			addView(name) {
-				console.log(name);
 				// mute previous webview
 				if(this.activeView != -1) {
 					this.getCurrentView().setAudioMuted(true);
+				}
+
+				// show menu
+				if(name == -1) {
+					this.activeView = -1;
+					return;
 				}
 
 				if(!this.views.includes(name)) {
@@ -165,6 +170,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 					return accelerator
 				}
+			},
+			zoomReset() {
+				if(this.activeView != -1) {
+					this.getCurrentView().setZoomLevel(1);
+				}
+			},
+			zoomIn() {
+				if(this.activeView != -1) {
+					this.getCurrentView().setZoomLevel(this.getCurrentView().getZoomLevel() + 1);
+				}
+			},
+			zoomOut() {
+				if(this.activeView != -1) {
+					this.getCurrentView().setZoomLevel(this.getCurrentView().getZoomLevel() - 1);
+				}
+			},
+			reloadCurrentView() {
+				if(this.activeView != -1) {
+					this.getCurrentView().reload();
+				}
+			},
+			triggerSettings() {
+				this.settings.showDialog = !this.settings.showDialog;
 			}
 		},
 		mounted: function() {
@@ -172,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			this.$vuetify.theme = {
 				primary: '#00796B',
 				secondary: '#004D40',
-				accent: '#FF0E83',
+				accent: '#00796B',
 				error: '#66336E'
 			}
 			this.sendMessage('vueReady');
@@ -182,29 +210,27 @@ document.addEventListener('DOMContentLoaded', () => {
 			})
 
 			ipcRenderer.on('triggerSettings', () => {
-				this.settings.showDialog = !this.settings.showDialog;
+				this.triggerSettings();
 			})
 
 			ipcRenderer.on('reloadCurrentView', () => {
-				if(this.activeView != -1) {
-					this.getCurrentView().reload();
-				}
+				this.reloadCurrentView();
 			})
 
 			// zoom
 			ipcRenderer.on('zoomReset', () => {
-				if(this.activeView != -1) {
-					this.getCurrentView().setZoomLevel(1);
-				}
+				this.zoomReset();
 			})
 			ipcRenderer.on('zoomIn', () => {
-				if(this.activeView != -1) {
-					this.getCurrentView().setZoomLevel(this.getCurrentView().getZoomLevel() + 1);
-				}
+				this.zoomIn();
 			})
 			ipcRenderer.on('zoomOut', () => {
-				if(this.activeView != -1) {
-					this.getCurrentView().setZoomLevel(this.getCurrentView().getZoomLevel() - 1);
+				this.zoomOut();
+			})
+
+			ipcRenderer.on('addView', (event, args) => {
+				if(args.length > 0) {
+					this.addView(args[0]);
 				}
 			})
 

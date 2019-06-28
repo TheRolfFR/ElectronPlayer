@@ -31,14 +31,14 @@
                             <v-menu light offset-y>
                                 <template v-slot:activator="{ on }">
                                     <v-btn dark flat class="menu-btn ma-0 py-1 px-2 text-capitalize" v-on="on">
-                                        {{ menu.name }}</v-btn>
+                                        {{ menu.label }}</v-btn>
                                 </template>
                                 <v-list>
-                                    <v-list-tile v-for="(item, itemindex) in menu.items" :key="itemindex" @click="item.click(item.name)"
-                                        style="height: 24px" :inactive="item.disabled"
+                                    <v-list-tile v-for="(item, itemindex) in menu.submenu" :key="itemindex" @click="item.click(item.name)"
+                                        style="height: 24px" :inactive="item.disabled || item.type == 'separator'"
                                         :class="{'item-disabled' : item.disabled}">
                                         <template v-if="item.type === undefined">
-                                            <v-list-tile-title>{{ item.name }}</v-list-tile-title>
+                                            <v-list-tile-title>{{ item.label }}</v-list-tile-title>
                                             <v-list-tile-content></v-list-tile-content>
                                             <v-list-tile-action class="pl-2 accelerator">
                                                 {{ acceleratorName(item.accelerator || "") }}
@@ -53,7 +53,7 @@
                         </template>
                         <template v-else>
                             <v-btn dark flat class="menu-btn ma-0 py-1 px-2 text-capitalize"
-                                v-on:click="settings.showDialog = true">{{ menu.name }}</v-btn>
+                                v-on:click="menu.click()">{{ menu.label }}</v-btn>
                         </template>
                     </template>
                 </v-toolbar>

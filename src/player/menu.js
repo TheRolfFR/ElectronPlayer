@@ -1,114 +1,154 @@
 module.exports = (version) => {
     return [{
-        name: "Services",
-        items: [
+        label: "Services",
+        submenu: [
             {
-                "name": "Menu",
-                "accelerator": "CmdOrCtrl+H",
+                label: "Menu",
+                accelerator: "CmdOrCtrl+H",
                 click: function() {
-                    vue.activeView = -1
+                    commandToPlayer("addView", -1);
                 }
             },
             {
-                "type": "separator"
+                type: "separator"
             },
             {
-                "name": "Floatplane",
-                click(name) {
-                    vue.addView(name)
+                label: "Floatplane",
+                click() {
+                    commandToPlayer("addView", "Floatplane")
                 }
             },
             {
-                "name": "Netflix",
-                click(name) {
-                    vue.addView(name)
+                label: "Netflix",
+                click() {
+                    commandToPlayer("addView", "Netflix")
                 }
             },
             {
-                "name": "Spotify",
-                click(name) {
-                    vue.addView(name)
+                label: "Spotify",
+                click() {
+                    commandToPlayer("addView", "Spotify")
                 }
             },
             {
-                "name": "Twitch",
-                click(name) {
-                    vue.addView(name)
+                label: "Twitch",
+                click() {
+                    commandToPlayer("addView", "Twitch")
                 }
             },
             {
-                "name": "YouTube",
-                click(name) {
-                    vue.addView(name)
+                label: "YouTube",
+                click() {
+                    commandToPlayer("addView", "YouTube")
                 }
             }
         ]
     },
     {
         type: "button",
-        name: "settings"
+        label: "Settings",
+        click: function() {
+            commandToPlayer("triggerSettings");
+        }
     },
     {
-        name: "Developer",
+        label: "Developer",
         noicons: true,
-        items: [
+        submenu: [
             {
-                "name": "Reload",
-                "accelerator" : " Ctrl+R",
-                "click": function() {
-                    mainWindow.webContents.send('reloadCurrentView');
+                label: "Reload",
+                accelerator : " Ctrl+R",
+                click: function() {
+                    vue.reloadCurrentView();
                 }
             },
             {
-                "name" : "Toggle Dev Tools",
-                "accelerator" : " Ctrl+Maj+I",
-                "click": function() {
-                    remote.getCurrentWindow().triggerDevTools();
+                label : "Toggle Dev Tools",
+                accelerator : "CmdOrCtrl+Maj+I",
+                click: function() {
+                    commandToMain("triggerDevTools");
+                }
+            },
+            {
+                type: "separator"
+            },
+            {
+                label: "Actual Size",
+                accelerator : " Ctrl+0",
+                click: function() {
+                    vue.zoomReset();
+                }
+            },
+            {
+                label: "Zoom in",
+                accelerator : " Ctrl+Maj+=",
+                click: function() {
+                    vue.zoomIn();
+                }
+            },
+            {
+                label: "Zoom out",
+                accelerator : " Ctrl+Maj+-",
+                click: function() {
+                    vue.zoomOut();
                 }
             },
             {
                 "type" : "separator"
             },
             {
-                "name" : "Actual Size",
-                "accelerator" : " Ctrl+0"
-            },
-            {
-                "name" : "Zoom in",
-                "accelerator" : " Ctrl+Maj+="
-            },
-            {
-                "name" : "Zoom out",
-                "accelerator" : " Ctrl+Maj+-"
-            },
-            {
-                "type" : "separator"
-            },
-            {
-                "name" : "Toggle fullscreen",
-                "accelerator" : " F11"
+                label: "Toggle fullscreen",
+                accelerator : " F11"
             }
         ]
     },
     {
-        name: "About",
+        label: "About",
         noicons: true,
-        items: [
+        submenu: [
             {
-                name: 'ElectronPlayer (' + version + ')',
+                label: 'ElectronPlayer (' + version + ')',
                 disabled: true
             },
             {
-                name: "Created by Oscar Beaumont",
+                label: "Created by Oscar Beaumont",
                 disabled: true
             },
             {
-                name: "More informations"
+                label: "More informations",
+                click: function() {
+                    shell.openExternal('https://github.com/oscartbeaumont/ElectronPlayer');
+                }
             },
             {
-                name : "Quit ElectronPlayer",
+                label : "Quit ElectronPlayer",
                 accelerator : "Windows+Q"
             }
         ]
     }];
+
+    function commandToPlayer(command, option) {
+        try {
+            if(vue !== undefined) {
+                vue[command](option);
+            }
+            else if(mainWindow !== undefined) {
+                mainWindow.webContents.send(command, option);
+            }
+        } catch (error) {
+            
+        }
+    }
+
+    function commandToMain(command, option) {
+        try {
+            if(vue !== undefined) {
+                vue.sendMessage(command, option);
+            } else {
+                global[command](option);
+            }
+        } catch (error) {
+            
+        }
+    }
 }

@@ -40,9 +40,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00796b', end
 #app .accelerator, #app .item-disabled {
 	opacity: .4;
 }
-#app .accelerator {
-	text-transform: uppercase;
-}
 
 #app .view {
 	position: fixed;

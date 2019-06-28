@@ -1,9 +1,8 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, Menu, ipcMain, dialog, globalShortcut } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, globalShortcut, shell } = require('electron');
 const fs = require('fs'),
 	path = require('path'),
-	Store = require('electron-store'),
-	electronLocalshortcut = require('electron-localshortcut');
+	Store = require('electron-store');
 
 const headerScript = fs.readFileSync(
 	path.join(__dirname, 'client-header.js'),
@@ -48,6 +47,18 @@ function createWindow() {
 		if(store.get('settings.windowSize') !== undefined) {
 			parameters.width = store.get('settings.windowSize')[0];
 			parameters.height = store.get('settings.windowSize')[1];
+		}
+	}
+
+	function triggerDevTools() {
+		// closes the window if opened anywhere
+		if(mainWindow.webContents.isDevToolsOpened()) {
+			mainWindow.webContents.closeDevTools();
+		} else {
+			// opens it if the window is focused
+			if(mainWindow.webContents.isFocused()) {
+				mainWindow.webContents.openDevTools();
+			}
 		}
 	}
 
@@ -125,6 +136,10 @@ function createWindow() {
 			store.set('openDevTools', false);
 		})
 
+		ipcMain.on('triggerDevTools', () => {
+			triggerDevTools();
+		})
+
 		setTimeout(() => {
 			mainWindow.show();
 		}, 500);
@@ -149,16 +164,7 @@ function createWindow() {
 	// open dev tools
 	globalShortcut.register('CommandOrControl+Shift+I', () => {
 		// because trigger doesn't work
-
-		// closes the window if opened anywhere
-		if(mainWindow.webContents.isDevToolsOpened()) {
-			mainWindow.webContents.closeDevTools();
-		} else {
-			// opens it if the window is focused
-			if(mainWindow.webContents.isFocused()) {
-				mainWindow.webContents.openDevTools();
-			}
-		}
+		triggerDevTools();
 	});
 
 	mainWindow.on('move', () => {

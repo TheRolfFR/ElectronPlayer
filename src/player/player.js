@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	vue = new Vue({
 		el: "#content",
 		data: () => ({
+			frameless : store.get('frameless'),
 			items: services,
 			showMenu: store.get('showMenu'),
 			settings: {
@@ -193,6 +194,17 @@ document.addEventListener('DOMContentLoaded', () => {
 			},
 			triggerSettings() {
 				this.settings.showDialog = !this.settings.showDialog;
+			},
+			triggerFramelessWindow() {
+				this.frameless = !this.frameless;
+				
+				store.set('frameless', this.frameless);
+				
+				Vue.nextTick(() => {
+					setTimeout(() => {
+						this.calculateWebviewTop();
+					}, 200);
+				});
 			}
 		},
 		mounted: function() {
@@ -232,6 +244,10 @@ document.addEventListener('DOMContentLoaded', () => {
 				if(args.length > 0) {
 					this.addView(args[0]);
 				}
+			})
+
+			ipcRenderer.on('triggerFramelessWindow', () => {
+				this.triggerFramelessWindow();
 			})
 
 			if(store.get("settings.defaultService") !== undefined && store.get("settings.defaultService") != "Menu" && this.settings.serviceValues.includes(store.get("settings.defaultService"))) {

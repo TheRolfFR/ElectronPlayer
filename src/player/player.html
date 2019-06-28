@@ -13,7 +13,7 @@
 <body>
     <div id="content">
         <v-app dark style="background: transparent">
-            <v-system-bar ref="systembar" app absolute="true" window height="32" color="transparent">
+            <v-system-bar v-show="frameless" ref="systembar" app absolute="true" window height="32" color="transparent">
                 <v-img v-on:click="triggerShowMenu()"
                     src="../../build/icon.png"
                     max-height="22" max-width="22"></v-img>
@@ -24,7 +24,7 @@
                 <v-icon v-on:click="close()">close</v-icon>
             </v-system-bar>
             <v-expand-transition>
-                <v-toolbar ref="menu" dense flat light v-show="showMenu" style="margin-top: 32px; background: transparent"
+                <v-toolbar ref="menu" dense flat light v-show="frameless && showMenu" style="margin-top: 32px; background: transparent"
                     class="pa-0" id="menu-toolbar">
                     <template v-for="(menu, i) in menus" :key="i">
                         <template v-if="menu.type == undefined">
@@ -126,7 +126,7 @@
                                 </v-list-tile-action>
                             </v-list-tile>
                             <v-list-tile>
-                                <v-btn small depressed block color="primary">Set window frameless*</v-btn>
+                                <v-btn @click="triggerFramelessWindow()" small depressed block color="primary">Trigger frameless window (Alt+F)</v-btn>
                             </v-list-tile>
                         </v-list>
 

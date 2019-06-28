@@ -124,6 +124,10 @@ function createWindow() {
 				mainWindow.webContents.send('zoomOut');
 		})
 
+		globalShortcut.register('Alt+F', () => {
+			mainWindow.webContents.send('triggerFramelessWindow');
+		})
+
 		// open maybe the dev tools
 		if(store.get('openDevTools'))
 			mainWindow.webContents.openDevTools();

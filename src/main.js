@@ -14,11 +14,14 @@ let mainWindow; // Global Windows Object
 const store = new Store();
 global.services = [];
 
+const minWidth = 800;
+const minHeight = 600;
+
 function createWindow() {
 	// Create the browser window.
 	let parameters = {
-		minWidth: 800,
-		minHeight: 600,
+		minWidth: minWidth,
+		minHeight: minHeight,
 		webPreferences: {
 			nodeIntegration: true,
 			contextIsolation: false,
@@ -70,8 +73,17 @@ function createWindow() {
 
 		// size reseter
 		globalShortcut.register('Alt+R', () => {
-			if(mainWindow.isFocused())
-				mainWindow.setSize(800, 600, true);
+			if(mainWindow.isFocused()) {
+				const pos = mainWindow.getPosition();
+				const size = mainWindow.getSize();
+				const newpos = [pos[0] + Math.round(0.5*(size[0] - minWidth)), pos[1]  + Math.round(0.5*(size[1] - minHeight))];
+				mainWindow.setBounds({
+					x: newpos[0],
+					y: newpos[1],
+					width: minWidth,
+					height: minHeight
+				}, false);
+			}
 		});
 
 		// because local shortcut doesn't work in webviews
@@ -165,6 +177,10 @@ function createWindow() {
 		event.returnValue = app.getVersion();
 	});
 
+	ipcMain.on('openConfigFile', () => {
+		shell.openItem(path.join(app.getPath('userData'), 'config.json'));
+	})
+
 	// open dev tools
 	globalShortcut.register('CommandOrControl+Shift+I', () => {
 		// because trigger doesn't work
@@ -172,8 +188,12 @@ function createWindow() {
 	});
 
 	mainWindow.on('move', () => {
-		// corrects [-8, -8] when maximised
-		store.set('settings.windowPosition', ((mainWindow.isMaximized()) ? ([0, 0]) : mainWindow.getPosition()));
+		let pos = mainWindow.getPosition();
+		if(mainWindow.isMaximized()) {
+			pos[0] += Math.abs(pos[1]);
+			pos[1] = 0;
+		}
+		store.set('settings.windowPosition', pos);
 	})
 
 	mainWindow.on('resize', () => {

@@ -199,12 +199,15 @@ document.addEventListener('DOMContentLoaded', () => {
 				this.frameless = !this.frameless;
 				
 				store.set('frameless', this.frameless);
-				
+
 				Vue.nextTick(() => {
 					setTimeout(() => {
 						this.calculateWebviewTop();
 					}, 200);
 				});
+			},
+			openConfigFile() {
+				this.sendMessage('openConfigFile');
 			}
 		},
 		mounted: function() {

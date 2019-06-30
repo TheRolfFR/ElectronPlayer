@@ -8,14 +8,6 @@ html {
 	overflow: hidden !important;
 }
 div#content {
-background: #00796b;
-background: -moz-linear-gradient(top, #00796b 0%, #00796b 10%, #004d40 100%);
-background: -webkit-gradient(left top, left bottom, color-stop(0%, #00796b), color-stop(10%, #00796b), color-stop(100%, #004d40));
-background: -webkit-linear-gradient(top, #00796b 0%, #00796b 10%, #004d40 100%);
-background: -o-linear-gradient(top, #00796b 0%, #00796b 10%, #004d40 100%);
-background: -ms-linear-gradient(top, #00796b 0%, #00796b 10%, #004d40 100%);
-background: linear-gradient(to bottom, #00796b 0%, #00796b 10%, #004d40 100%);
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00796b', endColorstr='#004d40', GradientType=0 );
 	height: 100%;
 }
 #content #app, #content .application--wrap {
@@ -33,6 +25,26 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00796b', end
 }
 #app {
 	font-family: 'Source Sans Pro', sans-serif !important;
+}
+#app.DarkGrey {	
+	background: #525352;
+	background: -moz-linear-gradient(top, #525352 0%, #525352 10%, #292929 100%);
+	background: -webkit-gradient(left top, left bottom, color-stop(0%, #525352), color-stop(10%, #525352), color-stop(100%, #292929));
+	background: -webkit-linear-gradient(top, #525352 0%, #525352 10%, #292929 100%);
+	background: -o-linear-gradient(top, #525352 0%, #525352 10%, #292929 100%);
+	background: -ms-linear-gradient(top, #525352 0%, #525352 10%, #292929 100%);
+	background: linear-gradient(to bottom, #525352 0%, #525352 10%, #292929 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#525352', endColorstr='#292929', GradientType=0);
+}
+#app.Lightgreen {
+background: #00796b;
+background: -moz-linear-gradient(top, #00796b 0%, #00796b 10%, #004d40 100%);
+background: -webkit-gradient(left top, left bottom, color-stop(0%, #00796b), color-stop(10%, #00796b), color-stop(100%, #004d40));
+background: -webkit-linear-gradient(top, #00796b 0%, #00796b 10%, #004d40 100%);
+background: -o-linear-gradient(top, #00796b 0%, #00796b 10%, #004d40 100%);
+background: -ms-linear-gradient(top, #00796b 0%, #00796b 10%, #004d40 100%);
+background: linear-gradient(to bottom, #00796b 0%, #00796b 10%, #004d40 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00796b', endColorstr='#004d40', GradientType=0 );
 }
 #app .v-list__tile {
 	height: 100%;
@@ -55,8 +67,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00796b', end
 }
 
 body .v-overlay {
-	height: 600px;
-	width: 800px;
+	height: 100%;
+	width: 100%;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);

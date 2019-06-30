@@ -1,8 +1,10 @@
 const { app, ipcRenderer, remote, shell } = require('electron');
 const services = require('../default-services.js');
+let menuItems = services.slice(0);
 const menu = require('./menu');
-Store = require('electron-store')
+const Store = require('electron-store');
 
+menuItems.unshift({name: 'Menu'});
 Vue.config.devtools = true;
 
 const store = new Store();
@@ -14,13 +16,29 @@ document.addEventListener('DOMContentLoaded', () => {
 		data: () => ({
 			frameless : store.get('frameless'),
 			items: services,
+			menuItems: menuItems,
 			showMenu: store.get('showMenu'),
+			showSettings: false,
 			settings: {
-				showDialog: false,
-				alwaysOnTop: store.get('settings.alwaysOnTop'),
-				rememberWindowPosition: store.get('settings.rememberWindowPosition'),
-				defaultService: store.get("settings.defaultService") || "Menu",
-				serviceValues: ["Menu", "Netflix", "YouTube", "Twitch", "Spotify", "Floatplane"]
+				alwaysOnTop: store.get('settings').alwaysOnTop || false,
+				rememberWindowPosition: store.get('settings').rememberWindowPosition || false,
+				defaultService: store.get('settings').defaultService || "Menu",
+				theme: store.get('settings').theme || 'DarkGrey'
+			},
+			themeNames: ['Lightgreen', 'DarkGrey'],
+			themeColors: {
+				'DarkGrey': {
+					primary: '#292929',
+					secondary: '#525352',
+					accent: '#292929',
+					error: '#66336E'
+				},
+				'Lightgreen': {
+					primary: '#00796B',
+					secondary: '#004D40',
+					accent: '#00796B',
+					error: '#66336E'
+				}
 			},
 			menus: menu(ipcRenderer.sendSync('getVersion')),
 			animation: undefined,
@@ -36,14 +54,19 @@ document.addEventListener('DOMContentLoaded', () => {
 		}),
 		watch: {
 			'settings.alwaysOnTop': function(newValue, oldValue) {
-				store.set('settings.alwaysOnTop', newValue);
 				remote.getCurrentWindow().setAlwaysOnTop(newValue);
-			},
-			'settings.rememberWindowPosition': function(newValue, oldValue) {
-				store.set('settings.rememberWindowPosition', newValue);
 			},
 			'settings.defaultService': function(newValue, oldValue) {
 				store.set("settings.defaultService", newValue);
+			},
+			'settings.theme': function(newValue, oldValue) {
+				this.changeTheme(newValue);
+			},
+			settings: {
+				handler: function(newValue, oldValue) {
+					store.set('settings', newValue);
+				},
+				deep: true
 			},
 			'showMenu': function(newValue, oldValue) {
 				store.set('showMenu', newValue);
@@ -51,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		},
 		computed: {
 			calculatedTop() {
+
 			}
 		},
 		methods: {
@@ -193,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 			},
 			triggerSettings() {
-				this.settings.showDialog = !this.settings.showDialog;
+				this.showSettings = !this.showSettings;
 			},
 			triggerFramelessWindow() {
 				this.frameless = !this.frameless;
@@ -208,16 +232,19 @@ document.addEventListener('DOMContentLoaded', () => {
 			},
 			openConfigFile() {
 				this.sendMessage('openConfigFile');
+			},
+			radioValueDisplay(v) {
+				return v.split(/(?=[A-Z])/).join(' ');
+			},
+			changeTheme(value) {
+				if(value in this.themeColors) {
+					this.$vuetify.theme = this.themeColors[value];
+				}
 			}
 		},
 		mounted: function() {
 			this.calculateWebviewTop();
-			this.$vuetify.theme = {
-				primary: '#00796B',
-				secondary: '#004D40',
-				accent: '#00796B',
-				error: '#66336E'
-			}
+			this.changeTheme(this.settings.theme);
 			this.sendMessage('vueReady');
 
 			ipcRenderer.on('triggerMenu', () => {

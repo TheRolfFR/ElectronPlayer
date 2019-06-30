@@ -35,14 +35,14 @@ function createWindow() {
 		resizable: true,
 		vibrancy: 'ultra-dark',
 		frame: false,
-		alwaysOnTop: store.get('settings.alwaysOnTop'),
+		alwaysOnTop: store.get('settings').alwaysOnTop,
 		backgroundColor: '#00796B',
 		toolbar: false,
 		show: false
 	};
 
 	// set size
-	if(store.get('settings.rememberWindowPosition')) {
+	if(store.get('settings').rememberWindowPosition) {
 		if(store.get('settings.windowPosition') !== undefined) {
 			parameters.x = store.get('settings.windowPosition')[0];
 			parameters.y = store.get('settings.windowPosition')[1];
@@ -68,6 +68,10 @@ function createWindow() {
 	mainWindow = new BrowserWindow(parameters);
 
 	mainWindow.loadURL(`file://${__dirname}/player/player.html`);
+
+	// open maybe the dev tools
+	if(store.get('openDevTools'))
+		mainWindow.webContents.openDevTools();
 
 	ipcMain.once('vueReady', () => {
 
@@ -140,10 +144,6 @@ function createWindow() {
 			mainWindow.webContents.send('triggerFramelessWindow');
 		})
 
-		// open maybe the dev tools
-		if(store.get('openDevTools'))
-			mainWindow.webContents.openDevTools();
-
 		// devtools events
 		mainWindow.webContents.on('devtools-opened', () => {
 			store.set('openDevTools', true);
@@ -188,16 +188,20 @@ function createWindow() {
 	});
 
 	mainWindow.on('move', () => {
-		let pos = mainWindow.getPosition();
-		if(mainWindow.isMaximized()) {
-			pos[0] += Math.abs(pos[1]);
-			pos[1] = 0;
+		if(store.get('settings').rememberWindowPosition) {
+			let pos = mainWindow.getPosition();
+			if(mainWindow.isMaximized()) {
+				pos[0] += Math.abs(pos[1]);
+				pos[1] = 0;
+			}
+			store.set('settings.windowPosition', pos);
 		}
-		store.set('settings.windowPosition', pos);
 	})
 
 	mainWindow.on('resize', () => {
-		store.set('settings.windowSize', mainWindow.getSize());
+		if(store.get('settings').rememberWindowPosition) {
+			store.set('settings.windowSize', mainWindow.getSize());
+		}
 	})
 }
 

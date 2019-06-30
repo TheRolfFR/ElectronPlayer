@@ -12,8 +12,8 @@
 
 <body>
     <div id="content">
-        <v-app dark style="background: transparent">
-            <v-system-bar v-show="frameless" ref="systembar" app absolute="true" window height="32" color="transparent">
+        <v-app dark :class="settings.theme">
+            <v-system-bar v-show="frameless" ref="systembar" app absolute="true" window height="32" color="transparent" class="pr-1">
                 <v-img v-on:click="triggerShowMenu()"
                     src="../../build/icon.png"
                     max-height="22" max-width="22"></v-img>
@@ -93,7 +93,7 @@
                     </v-layout>
                 </v-flex>
             </v-layout>
-            <v-dialog v-model="settings.showDialog" width="600px">
+            <v-dialog v-model="showSettings" width="600px">
                 <v-card light>
                     <v-card-title>
                         <span class="headline">Settings</span>
@@ -129,21 +129,36 @@
                                 <v-btn @click="triggerFramelessWindow()" small depressed block color="primary">Trigger frameless window (Alt+F)</v-btn>
                             </v-list-tile>
                         </v-list>
+                    </v-list>
 
                         <v-radio-group v-model="settings.defaultService">
                             <v-list>
                                 <v-subheader>Default service</v-subheader>
-                                <v-list-tile v-for="service in settings.serviceValues" :key="service">
+                                <v-list-tile v-for="service in menuItems" :key="service.name">
                                     <v-list-tile-content>
-                                        <v-list-title :href="'#btn' + service">{{ service }}</v-list-title>
+                                        <v-list-title :href="'#btn' + service.name">{{ service.name }}</v-list-title>
                                     </v-list-tile-content>
                                     <v-list-tile-action>
-                                        <v-radio :id="'btn' + service" :value="service"></v-radio>
+                                        <v-radio :id="'btn' + service.name" :value="service.name"></v-radio>
                                     </v-list-tile-action>
                                 </v-list-tile>
                             </v-list>
                         </v-radio-group>
                     </v-form>
+
+                    <v-subheader>Theme</v-subheader>
+                    <v-radio-group v-model="settings.theme">
+                        <v-list>
+                            <v-list-tile v-for="themeName in themeNames" :key="themeName">
+                                <v-list-tile-content>
+                                    <v-list-title >{{ radioValueDisplay(themeName) }}</v-list-title>
+                                </v-list-tile-content>
+                                <v-list-tile-action>
+                                    <v-radio :value="themeName"></v-radio>
+                                </v-list-tile-action>
+                            </v-list-tile>
+                        </v-list>
+                    </v-radio-group>
 
                     <v-subheader>Other</v-subheader>
                     <v-list>
